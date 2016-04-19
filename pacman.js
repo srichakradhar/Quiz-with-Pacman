@@ -23,6 +23,8 @@ var NONE        = 4,
 
 Pacman.FPS = 30;
 
+var details_submitted = false;
+
 Pacman.Ghost = function (game, map, colour) {
 
     var position  = null,
@@ -312,7 +314,7 @@ Pacman.User = function (game, map) {
 
     function initUser() {
         score = 0;
-        lives = 3;
+        lives = 4;
         newLevel();
     }
     
@@ -910,7 +912,7 @@ var PACMAN = (function () {
         map.drawBlock(Math.ceil(pos.y/10), Math.ceil(pos.x/10), ctx);
     }
 
-    function mainDraw() { 
+    function mainDraw() {
 
         var diff, u, i, len, nScore;
         
@@ -1092,8 +1094,7 @@ var PACMAN = (function () {
     
     return {
         "init" : init,
-        "setState" : setState,
-        "lastTime" : lastTime
+        "setState" : setState
     };
     
 }());
@@ -1280,6 +1281,7 @@ var questions = [
 function _(x){
     return document.getElementById(x);
 }
+
 function renderQuestion(){
     test = _("test");
     _("pacman").style.display = "none"; //hide;
@@ -1294,7 +1296,10 @@ function renderQuestion(){
 }
 function checkAnswer(){
     test = _("test");
-    if(pos >= questions.length){
+    if(pos >= questions.length - 1){
+        if(choice == questions[pos][4]){
+        correct++;
+        }
         test.innerHTML = "<h5 class = 'text-center'>You got "+correct+" of "+questions.length+" questions correct</h2>";
         _("test_status").innerHTML = "Test Completed";
         pos = 0;
@@ -1310,12 +1315,35 @@ function checkAnswer(){
     }
     if(choice == questions[pos][4]){
         correct++;
-        pos++;
-        test.style.display = "none"; //hide
-        _("pacman").style.display = "block"; //show
-        PACMAN.setState(DYING);
     }
     else{
-        renderQuestion();   //ask the question again if the choice is incorrect
+        renderQuestion();
     }
+    test.style.display = "none"; //hide
+    _("pacman").style.display = "block"; //show
+    PACMAN.setState(DYING);
+    pos++;
 }
+
+function uploadDetails() {
+    alert("hey, I work!")
+    _("details_form").style.display = "none";
+    _("pacman").style.display = "block"; //show
+    details_submitted = true;
+}
+
+$(document).ready(function() {
+
+    $("#details_form").submit(function(e) {
+        _("details_form").style.display = "none";
+        $(this).hide();
+    });
+
+    $("#submit_button").click(function(e) {
+        
+        $("#details_form").submit();
+        e.preventDefault();
+        _("details_form").style.display = "none";
+});
+
+});
