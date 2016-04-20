@@ -314,7 +314,7 @@ Pacman.User = function (game, map) {
 
     function initUser() {
         score = 0;
-        lives = 4;
+        lives = questions.length;
         newLevel();
     }
     
@@ -877,14 +877,14 @@ var PACMAN = (function () {
     function drawFooter() {
         
         var topLeft  = (map.height * map.blockSize),
-            textBase = topLeft + 17;
+            textBase = topLeft + 17, i = 0;
         
         ctx.fillStyle = "#000000";
         ctx.fillRect(0, topLeft, (map.width * map.blockSize), 30);
         
         ctx.fillStyle = "#FFFF00";
 
-        for (var i = 0, len = user.getLives(); i < len; i++) {
+        // for (var i = 0, len = user.getLives(); i < len; i++) {
             ctx.fillStyle = "#FFFF00";
             ctx.beginPath();
             ctx.moveTo(150 + (25 * i) + map.blockSize / 2,
@@ -894,7 +894,9 @@ var PACMAN = (function () {
                     (topLeft+1) + map.blockSize / 2,
                     map.blockSize / 2, Math.PI * 0.25, Math.PI * 1.75, false);
             ctx.fill();
-        }
+        // }
+
+        ctx.fillText(user.getLives(), 175, textBase);
 
         ctx.fillStyle = !soundDisabled() ? "#00FF00" : "#FF0000";
         ctx.font = "bold 16px sans-serif";
@@ -1273,10 +1275,16 @@ Object.prototype.clone = function () {
 };
 var pos = 0, test, test_status, question, choice, choices, chA, chB, chC, correct = 0;
 var questions = [
-    [ "What is 10 + 4?", "12", "14", "16", "B" ],
-    [ "What is 20 - 9?", "7", "13", "11", "C" ],
-    [ "What is 7 x 3?", "21", "24", "25", "A" ],
-    [ "What is 8 / 2?", "10", "2", "4", "C" ]
+    [ "What function  displays row data in a column or column data in a row?", "Hyperlink", "Index", "Transpose", "Transpose", "C" ],
+    [ "When you insert an Excel file into a Word document, the data are", "Hyperlinked", "Placed in a word table", "Linked", "Embedded", "B" ],
+    [ "Except for the …… function, a formula with a logical function shows the word “TRUE” or “FALSE” as a result", "IF", "AND", "OR", "NOT", "A" ],
+    [ "Macros are “run” or executed from the ….. menu.", "Insert", "Format", "Tools", "Data", "C" ],
+    [ "You can open the consolidate dialog box byt choosing Consolidate from the ….. menu.", "Insert", "Format", "Tools", "Data", "D" ],
+    [ "Each excel file is called a workbook because", "It can contain text and data", "It can be modified", "It can contain many sheets including worksheets and chart sheets", "You have to work hard to create it", "C"],
+    [ "Which types of charts can excel produce?", "Line graphs and pie charts only", "Only line graphs", "Bar charts, line graphs and pie charts", "Bar charts and line graphs only", "C"],
+    [ "How are data organized in a spreadsheet?", "Lines and spaces", "Layers and planes", "Rows and columns", "Height and width", "C"],
+    [ "What does the VLOOKUP function do?", "Looks up text that contain ‘v’", "Checks whether text is the same in one cell as in the next", " Finds related records", "All of above", "C"],
+    [ "Gridlines", "May be turned off for display but turned on for printing","May be turned on or off for printing", "The be turned off for display and printing", "all of the above", "D"]
 ];
 function _(x){
     return document.getElementById(x);
@@ -1285,19 +1293,21 @@ function _(x){
 function renderQuestion(){
     test = _("test");
     _("pacman").style.display = "none"; //hide;
+    _("answer_button").style.display = "block"; //show;
     test.style.display = "block"; //show
     _("test_status").innerHTML = "Question "+(pos+1)+" of "+questions.length;
     question = questions[pos][0];
     chA = questions[pos][1];
     chB = questions[pos][2];
     chC = questions[pos][3];
-    test.innerHTML = "<div class='panel panel-primary text-center'><div class='panel-heading'>"+question+"</div><div class='panel-body'><div class='radio'><label><input type='radio' name='choices' value='A'> "+chA+"</label></div><div class='radio'><label><input type='radio' name='choices' value='B'> "+chB+"</label></div><div class='radio'><label><input type='radio' name='choices' value='C'> "+chC+"</label></div></div><button type='button' class='btn btn-default' onclick='checkAnswer()'>Submit Answer</button>";
+    chD = questions[pos][4]
+    test.innerHTML = "<div class='panel panel-primary'><div class='panel-heading'>"+question+"</div><div class='panel-body'><div class='radio'><label><input type='radio' name='choices' value='A'> "+chA+"</label></div><div class='radio'><label><input type='radio' name='choices' value='B'> "+chB+"</label></div><div class='radio'><label><input type='radio' name='choices' value='C'> "+chC+"</label></div><div class='radio'><label><input type='radio' name='choices' value='D'> "+chD+"</label></div></div>";
     PACMAN.setState(WAITING);
 }
 function checkAnswer(){
     test = _("test");
     if(pos >= questions.length - 1){
-        if(choice == questions[pos][4]){
+        if(choice == questions[pos][5]){
         correct++;
         }
         test.innerHTML = "<h5 class = 'text-center'>You got "+correct+" of "+questions.length+" questions correct</h2>";
@@ -1320,6 +1330,7 @@ function checkAnswer(){
         renderQuestion();
     }
     test.style.display = "none"; //hide
+    _("answer_button").style.display = "none"; //hide;
     _("pacman").style.display = "block"; //show
     PACMAN.setState(DYING);
     pos++;
@@ -1327,7 +1338,7 @@ function checkAnswer(){
 
 $(document).ready(function() {
 
-    _("pacman").style.display = "none";
+    window.setTimeout(function(){_("pacman").style.display = "none";}, 100); 
     // $("#pacman").hide();
     // $("#pacman").addClass("hide");
 
@@ -1340,6 +1351,5 @@ $(document).ready(function() {
         }
         return false; // prevents page refresh! :) yay!!
     });
-
 
 });
