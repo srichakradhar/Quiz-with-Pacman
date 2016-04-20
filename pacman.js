@@ -1325,25 +1325,21 @@ function checkAnswer(){
     pos++;
 }
 
-function uploadDetails() {
-    alert("hey, I work!")
-    _("details_form").style.display = "none";
-    _("pacman").style.display = "block"; //show
-    details_submitted = true;
-}
-
 $(document).ready(function() {
 
-    $("#details_form").submit(function(e) {
+    _("pacman").style.display = "none";
+    // $("#pacman").hide();
+    // $("#pacman").addClass("hide");
+
+    $("form").submit(function(e) {
         _("details_form").style.display = "none";
-        $(this).hide();
+        if(_("details_form").style.display === "none"){
+            _("pacman").style.display = "block";
+            // $("#pacman").removeClass("hide");
+            // $("#pacman").show();
+        }
+        return false; // prevents page refresh! :) yay!!
     });
 
-    $("#submit_button").click(function(e) {
-        
-        $("#details_form").submit();
-        e.preventDefault();
-        _("details_form").style.display = "none";
-});
 
 });
