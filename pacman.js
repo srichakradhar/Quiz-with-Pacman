@@ -23,7 +23,7 @@ var NONE        = 4,
 
 Pacman.FPS = 30;
 
-var details_submitted = false;
+var gameStarted = false;
 
 Pacman.Ghost = function (game, map, colour) {
 
@@ -835,7 +835,7 @@ var PACMAN = (function () {
     }
 
     function keyDown(e) {
-        if (e.keyCode === KEY.N) {
+        if (e.keyCode === KEY.N && gameStarted === true) {
             startNewGame();
         } else if (e.keyCode === KEY.S) {
             audio.disableSound();
@@ -1275,7 +1275,7 @@ Object.prototype.clone = function () {
 };
 var pos = 0, test, test_status, question, choice, choices, chA, chB, chC, correct = 0;
 var questions = [
-    [ "What function  displays row data in a column or column data in a row?", "Hyperlink", "Index", "Transpose", "Transpose", "C" ],
+    [ "What function  displays row data in a column or column data in a row?", "Hyperlink", "Index", "Transpose", "Rows", "C" ],
     [ "When you insert an Excel file into a Word document, the data are", "Hyperlinked", "Placed in a word table", "Linked", "Embedded", "B" ],
     [ "Except for the …… function, a formula with a logical function shows the word “TRUE” or “FALSE” as a result", "IF", "AND", "OR", "NOT", "A" ],
     [ "Macros are “run” or executed from the ….. menu.", "Insert", "Format", "Tools", "Data", "C" ],
@@ -1296,6 +1296,7 @@ function renderQuestion(){
     _("answer_button").style.display = "block"; //show;
     test.style.display = "block"; //show
     _("test_status").innerHTML = "Question "+(pos+1)+" of "+questions.length;
+    
     question = questions[pos][0];
     chA = questions[pos][1];
     chB = questions[pos][2];
@@ -1306,24 +1307,46 @@ function renderQuestion(){
 }
 function checkAnswer(){
     test = _("test");
-    if(pos >= questions.length - 1){
-        if(choice == questions[pos][5]){
-        correct++;
-        }
-        test.innerHTML = "<h5 class = 'text-center'>You got "+correct+" of "+questions.length+" questions correct</h2>";
-        _("test_status").innerHTML = "Test Completed";
-        pos = 0;
-        correct = 0;
-        return false;
+    if(_("test_status").innerHTML === "Test Completed"){
+    	_("test_status").innerHTML = "Question";
+    	_("answer_button").innerHTML = "Submit Answer";
+    	_("answer_button").style.display = "none";
+    	_("pacman").style.display = "block";
+    	test.style.display = "none";
+    	_("progress-bar").style.width = "0%";
+    	_("progress-bar").innerHTML = "Start";
+    	return false;
     }
-
     choices = document.getElementsByName("choices");
     for(var i=0; i<choices.length; i++){
         if(choices[i].checked){
             choice = choices[i].value;  
         }
     }
-    if(choice == questions[pos][4]){
+    _("progress-bar").style.width = (pos + 1) / questions.length * 100 + "%";
+    _("progress-bar").innerHTML = (pos + 1) / questions.length * 100 + "% done";
+    if(pos >= questions.length - 1){
+        if(choice == questions[pos][5]){
+        correct++;
+        }
+        test.innerHTML = "<h5 class = 'text-center'>You got "+correct+" of "+questions.length+" questions correct</h2>";
+        _("test_status").innerHTML = "Test Completed";
+        _("answer_button").innerHTML = "Try Again";
+        var oForm = document.forms[0];
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'https://script.google.com/macros/s/AKfycbyiQFpHEGuAj54YqlAgxsvNoyyZD1CB6KGpO2K6WWywlMZce5S-/exec', true);
+        xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        xhr.onload = function () {
+            // do something to response
+            console.log(this.responseText);
+        };
+        xhr.send("Name=" + oForm.elements[0].value + "&Enterprise ID=" + oForm.elements[1].value + "&Employee ID=" + oForm.elements[2].value + "&Level=" + oForm.elements[3].value + "&Facility=" + oForm.elements[4].value + "&Score=" + correct/questions.length * 100);
+        pos = 0;
+        correct = 0;
+        return false;
+    }
+
+    if(choice == questions[pos][5]){
         correct++;
     }
     else{
@@ -1346,41 +1369,10 @@ $(document).ready(function() {
         _("details_form").style.display = "none";
         if(_("details_form").style.display === "none"){
             _("pacman").style.display = "block";
-            // $("#pacman").removeClass("hide");
-            // $("#pacman").show();
+            gameStarted = true;
         }
-        doGet();
+        
         return false; // prevents page refresh! :) yay!!
     });
 
 });
-
-function doGet(e) { // change to doPost(e) if you are recieving POST data
-  var ss = SpreadsheetApp.openById(ScriptProperties.getProperty('active'));
-  var sheet = ss.getSheetByName("DATA");
-  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0]; //read headers
-  var nextRow = sheet.getLastRow(); // get next row
-  var cell = sheet.getRange('a1');
-  var col = 0;
-  for (i in headers){ // loop through the headers and if a parameter name matches the header name insert the value
-    if (headers[i] == "Timestamp"){
-      val = new Date();
-    } else {
-      val = e.parameter[headers[i]];
-    }
-    cell.offset(nextRow, col).setValue(val);
-    col++;
-  }
-  //http://www.google.com/support/forum/p/apps-script/thread?tid=04d9d3d4922b8bfb&hl=en
-  var app = UiApp.createApplication(); // included this part for debugging so you can see what data is coming in
-  var panel = app.createVerticalPanel();
-  for( p in e.parameters){
-    panel.add(app.createLabel(p +" "+e.parameters[p]));
-  }
-  app.add(panel);
-  return app;
-}
-//http://www.google.sc/support/forum/p/apps-script/thread?tid=345591f349a25cb4&hl=en
-function setUp() {
-  ScriptProperties.setProperty('active', SpreadsheetApp.getActiveSpreadsheet().getId());
-}
